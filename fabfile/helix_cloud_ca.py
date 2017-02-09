@@ -1,14 +1,16 @@
 import os
 from contextlib import contextmanager
 
-from fabric.api import local, sudo
 from fabric.colors import red
 from fabric.context_managers import cd
 from fabric.decorators import task
-from fabric.operations import get
+from fabric.operations import local, sudo, get
 from fabric.utils import puts
-from fabtools.vagrant import vagrant_settings
 from fabtools import require
+from fabtools.vagrant import vagrant_settings
+
+
+__all__ = ['changelog', 'buildpackage']
 
 
 class Requirements(object):
@@ -51,6 +53,7 @@ class Settings(object):
 
 @task
 def changelog(branch=None):
+    """Create a new .deb version via changelog entry (see readme)"""
     settings = Settings()
     if branch is not None:
         puts('Using branch {}'.format(branch))
