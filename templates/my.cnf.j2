@@ -160,7 +160,8 @@ innodb_flush_method	= O_DIRECT
 wsrep_on = ON
 # See:  http://galeracluster.com/downloads/
 wsrep_provider = "/usr/lib/galera/libgalera_smm.so"
-wsrep_cluster_address = "{{ wresp_cluster_address }}"
+wsrep_cluster_address = "gcomm://{{ galera_nodes }}"
+wsrep_cluster_name = "{{ cluster_name }}"
 binlog_format = row
 default_storage_engine = InnoDB
 innodb_autoinc_lock_mode = 2
