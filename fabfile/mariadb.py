@@ -1,22 +1,47 @@
 from getpass import getpass
 
-from fabric.colors import red
-from fabric.contrib.files import upload_template, cd
-from fabric.decorators import task
+from fabric.api import execute, task
+from fabric.colors import red, green
+from fabric.contrib.files import upload_template, cd, settings
 from fabric.operations import run, put
 from fabric.utils import puts, abort
 from fabtools import require, service, deb
 
 from . import templates, files
 
-__all__ = ['install', 'install_arbitrator', 'bootstrap_cluster', 'start',
+__all__ = ['build_cluster', 'install', 'install_arbitrator', 'bootstrap_cluster', 'start',
            'add_node', 'add_admin']
 
 default_cluster_name = 'helix_cloud'
 
+@task
+def build_cluster(ip_a, ip_b, arbitrator, cluster_name=None):
+    password = getpass('Root password for MariaDB (saved in ~/.my.cnf):')
+
+    def note(msg): puts(green(msg), flush=True)
+
+    note('Installing MariaDB on {}'.format(ip_a))
+    galera_nodes = '{},{}'.format(ip_b, arbitrator)
+    execute(install, galera_nodes, cluster_name=cluster_name,
+            password=password, host=ip_a)
+
+    note('Installing MariaDB on {}'.format(ip_b))
+    galera_nodes = '{},{}'.format(ip_a, arbitrator)
+    execute(install, galera_nodes, cluster_name=cluster_name,
+            password=password, host=ip_b)
+
+    note('Installing Galera arbitrator on {}'.format(arbitrator))
+    galera_nodes = '{},{}'.format(ip_a, ip_b)
+    execute(install_arbitrator, galera_nodes, cluster_name=cluster_name,
+            host=arbitrator)
+
+    execute(bootstrap_cluster, host=ip_a)
+    execute(start, host=ip_b)
+    execute(start, name='garb', host=arbitrator)
+
 
 @task
-def install(galera_nodes, cluster_name=None):
+def install(galera_nodes, cluster_name=None, password=None):
     """Install MariaDB Galera Cluster.
 
     :param galera_nodes: Do not include `gcomm://` prefix;
@@ -34,7 +59,8 @@ def install(galera_nodes, cluster_name=None):
     run("add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://mariadb.mirror.anstey.ca/repo/10.1/ubuntu trusty main'")
     require.deb.update_index(quiet=True)
 
-    password = getpass("Root password for mariadb (usually same as local user password):")
+    if password is None:
+        password = getpass("Root password for mariadb (saved in ~/.my.cnf):")
     deb.preseed_package('mariadb-server', {
         'mysql-server/root_password': ('password', password),  # must be mysql, not mariadb here
         'mysql-server/root_password_again': ('password', password),
