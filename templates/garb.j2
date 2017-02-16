@@ -9,7 +9,8 @@ GALERA_GROUP="{{ cluster_name }}"
 
 # Optional Galera internal options string (e.g. SSL settings)
 # see http://galeracluster.com/documentation-webpages/galeraparameters.html
-GALERA_OPTIONS="pc.wait_prim=FALSE"
+# Garb has no default port 4567, so set it here
+GALERA_OPTIONS="base_port=4567;pc.wait_prim=FALSE"
 
 # Log file for garbd. Optional, by default logs to syslog
 # LOG_FILE=""
