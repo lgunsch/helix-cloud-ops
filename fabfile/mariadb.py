@@ -14,6 +14,7 @@ __all__ = ['build_cluster', 'install', 'install_arbitrator', 'bootstrap_cluster'
 
 default_cluster_name = 'helix_cloud'
 
+
 @task
 def build_cluster(ip_a, ip_b, arbitrator, cluster_name=None):
     password = getpass('Root password for MariaDB (saved in ~/.my.cnf):')
@@ -45,7 +46,7 @@ def install(galera_nodes, cluster_name=None, password=None):
     """Install MariaDB Galera Cluster.
 
     :param galera_nodes: Do not include `gcomm://` prefix;
-        See https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/#galera_nodes
+        See http://galeracluster.com/documentation-webpages/mysqlwsrepoptions.html#wsrep-cluster-address
     """
     if cluster_name is None:
         cluster_name = default_cluster_name
@@ -88,7 +89,7 @@ def install_arbitrator(galera_nodes, cluster_name=None):
     """Galera nodes must have port if arbitrator is running on same machine.
 
     :param galera_nodes: Do not include `gcomm://` prefix;
-        See https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/#galera_nodes
+        See http://galeracluster.com/documentation-webpages/arbitrator.html
     """
     if cluster_name is None:
         cluster_name = default_cluster_name
@@ -120,7 +121,7 @@ def bootstrap_cluster():
 
 @task
 def start(name='mysql'):
-    """Defaults to `mysql`, but may also be `garb`."""
+    """Defaults to `mysql`, but may also be `garb` for the arbitrator."""
     # nohup below is very important. See:
     # http://serverfault.com/questions/709223/galera-new-cluster-wsrep-unknown-error-141
     if service.is_running(name):
