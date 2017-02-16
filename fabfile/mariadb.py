@@ -87,18 +87,22 @@ def bootstrap_cluster():
     puts(red('No other mysqld daemons should be running for this cluster'))
     if service.is_running('mysql'):
         service.stop('mysql')
-    run('service mysql bootstrap')
+    # nohup below is very important. See:
+    # http://serverfault.com/questions/709223/galera-new-cluster-wsrep-unknown-error-141
+    run('nohup service mysql bootstrap')
 
 
 @task
 def start(name='mysql'):
     """Defaults to `mysql`, but may also be `garb`."""
+    # nohup below is very important. See:
+    # http://serverfault.com/questions/709223/galera-new-cluster-wsrep-unknown-error-141
     if service.is_running(name):
         puts(red('{} is already running. Restarting (not reload) to '
                  'init cluster membership.'.format(name)))
-        service.restart(name)
+        run('nohup service {} restart'.format(name))
     else:
-        service.start(name)
+        run('nohup service {} start'.format(name))
 
 
 @task
