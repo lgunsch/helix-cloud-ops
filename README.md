@@ -1,3 +1,8 @@
+# Overview
+These Fabric tasks are not meant to stateful, like Ansible, or Salt. It is
+assumed that you have spawned a brand new machine when you run a task,
+or set of tasks together. No state checking is done.
+
 # Setup
 
 1. Install vagrant, and virtualbox too if it's not pulled in by vagrant.
@@ -15,14 +20,35 @@
 
 # Usage:
 
-### `fab <my_task> -H <ip_address> -I`
+### `fab <my_task>:<my_args> -H <ip_address> -I`
 Run a task on a host.  We don't maintain a host list because they are all
-expendable. Think immutable-architecture. You should have spawned a
-brand-spanking new machine to replace another, instead of updating
-it in-place.
+expendable, and Cloud at Cost takes forever to spawn servers. **Think
+immutable-architecture**. You should have spawned a brand-spanking new
+machine to replace another, instead of updating it in-place.
 
 ### `fab -l`
 Use this to quickly view a list of all tasks.
+
+## Galera Cluster
+For recovering stopped nodes read:
+[Galera Replication - How to recover a PXC Cluster](https://www.percona.com/blog/2014/09/01/galera-replication-how-to-recover-a-pxc-cluster/)
+
+Read docs on [wresp_cluster_address](http://galeracluster.com/documentation-webpages/mysqlwsrepoptions.html#wsrep-cluster-address)
+to understand how they work before you screw up the cluster.
+
+    fab mariadb.build_cluster:<IP_A>,<IP_B>,<IP_ARB> -I
+    fab mariadb.add_admin:lgunsch -H <IP_A> -I
+
+There must always be an **odd number of nodes**. If there must be an even number
+of nodes, at least have one machine with an arbitrator to make the voting odd.
+Another option is to specify some nodes with a higher weight.
+
+Galera keeps state files around that apt will not remove, so even if you
+`apt-get purge mariadb-server galera-3` and re-install it, it will try
+and re-join its cluster to recover. If weird stuff is happening, build a
+fresh set of machines for a new cluster.
+
+## helix-cloud.ca
 
 ### `fab changelog[:branch=BRANCH]`
 Add release entries to the `debian/changelog` file using `dch` tool.
