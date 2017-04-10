@@ -48,6 +48,17 @@ Galera keeps state files around that apt will not remove, so even if you
 and re-join its cluster to recover. If weird stuff is happening, build a
 fresh set of machines for a new cluster.
 
+**Important**: If the whole cluster is shutdown, you must start up the
+cluster by starting the node with the most advanced node state ID. Individual
+nodes will refuse to start until that node has first been started.
+
+[Restarting the Cluster]()http://galeracluster.com/documentation-webpages/restartingcluster.html)
+
+For the definition of primary, which is mentioned in the logs a lot, see:
+
+[Primary Component](http://galeracluster.com/documentation-webpages/glossary.html#term-primary-component)
+
+
 ## helix-cloud.ca
 
 ### `fab changelog[:branch=BRANCH]`
