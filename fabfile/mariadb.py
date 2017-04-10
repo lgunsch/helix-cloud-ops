@@ -2,7 +2,7 @@ from getpass import getpass
 
 from fabric.api import execute, task
 from fabric.colors import red, green
-from fabric.contrib.files import upload_template, cd, settings
+from fabric.contrib.files import upload_template
 from fabric.operations import run, put
 from fabric.utils import puts, abort
 from fabtools import require, service, deb
@@ -16,29 +16,24 @@ default_cluster_name = 'helix_cloud'
 
 
 @task
-def build_cluster(ip_a, ip_b, arbitrator, cluster_name=None):
+def build_cluster(host_a, host_b, host_c, cluster_name=None):
     password = getpass('Root password for MariaDB (saved in ~/.my.cnf):')
 
     def note(msg): puts(green(msg), flush=True)
 
-    note('Installing MariaDB on {}'.format(ip_a))
-    galera_nodes = '{},{}'.format(ip_b, arbitrator)
-    execute(install, galera_nodes, cluster_name=cluster_name,
-            password=password, host=ip_a)
+    def do_node(addr, peer_a, peer_b):
+        note('Installing MariaDB on {}'.format(addr))
+        galera_nodes = '{},{}'.format(peer_a, peer_b)
+        execute(install, galera_nodes, cluster_name=cluster_name,
+                password=password, host=addr)
 
-    note('Installing MariaDB on {}'.format(ip_b))
-    galera_nodes = '{},{}'.format(ip_a, arbitrator)
-    execute(install, galera_nodes, cluster_name=cluster_name,
-            password=password, host=ip_b)
+    do_node(host_a, host_b, host_c)
+    do_node(host_b, host_a, host_c)
+    do_node(host_c, host_a, host_b)
 
-    note('Installing Galera arbitrator on {}'.format(arbitrator))
-    galera_nodes = '{},{}'.format(ip_a, ip_b)
-    execute(install_arbitrator, galera_nodes, cluster_name=cluster_name,
-            host=arbitrator)
-
-    execute(bootstrap_cluster, host=ip_a)
-    execute(start, host=ip_b)
-    execute(start, name='garb', host=arbitrator)
+    execute(bootstrap_cluster, host=host_a)
+    execute(start, host=host_b)
+    execute(start, host=host_c)
 
 
 @task
