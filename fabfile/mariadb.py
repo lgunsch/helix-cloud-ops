@@ -8,6 +8,7 @@ from fabric.utils import puts, abort
 from fabtools import require, service, deb
 
 from . import templates, files
+from .common import install_fail2ban
 
 __all__ = ['build_cluster', 'install', 'install_arbitrator', 'bootstrap_cluster', 'start',
            'add_node', 'add_admin']
@@ -145,9 +146,3 @@ def add_admin(username):
     run("mysql -D mysql -e \"GRANT ALL PRIVILEGES ON *.* TO '{}'@'%' WITH GRANT OPTION\""
         .format(username, password), pty=True)
     run("mysql -D mysql -e \"FLUSH PRIVILEGES\"")
-
-
-def install_fail2ban():
-    require.deb.package(['fail2ban'])
-    if not service.is_running('fail2ban'):
-        service.start('fail2ban')
