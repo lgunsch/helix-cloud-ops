@@ -23,5 +23,5 @@ def install_fail2ban():
 @task
 def set_hostname(short_hostname):
     require.file(files.remote.hostname, contents="{hostname}\n".format(hostname=short_hostname))
-    sed(files.remote.hosts, '(\s*127\.0\.1\.1\s+)ubuntu', '\\1{hostname}'.format(hostname=short_hostname))
+    sed(files.remote.hosts, '(\s*127\.0\.1\.1\s+)\w+$', '\\1{hostname}'.format(hostname=short_hostname))
     run('hostname {hostname}'.format(hostname=short_hostname))
