@@ -11,6 +11,7 @@ __all__ = ['bootstrap_cluster', 'install', 'setup_peering', 'config_volume', 'in
 default_volume_name = 'gv0'
 storage_path = '/gluster-storage'
 
+
 @task
 def bootstrap_cluster(host_a, host_b, host_c, volume_name=None):
     """Creates a simple replicated volume with `len(hosts)` replicas."""
@@ -33,6 +34,7 @@ def bootstrap_cluster(host_a, host_b, host_c, volume_name=None):
     execute(setup_peering, [host_b, host_c], host=host_a)
     execute(config_volume, volume_name, [host_a, host_b, host_c], host=host_a)
 
+
 @task
 def install():
     """Install required GlusterFS software and extras."""
@@ -43,15 +45,17 @@ def install():
     require.deb.ppa('ppa:gluster/glusterfs-coreutils')
     require.deb.package('glusterfs-coreutils')
 
+
 @task
 def setup_peering(peer_hosts):
-    """Make sure you do this only on ONE host."""
+    """Make sure you do this only on *ONE* host."""
     for host in peer_hosts:
         sudo('gluster peer probe {}'.format(host))
 
+
 @task
 def config_volume(volume_name, hosts):
-    """Make sure you do this only on ONE host."""
+    """Make sure you do this only on *ONE* host."""
     replica_num = len(hosts)
     cmd_prefix = 'gluster volume create {} replica {} transport tcp'.format(
         volume_name, replica_num)
@@ -65,9 +69,11 @@ def config_volume(volume_name, hosts):
 
     sudo('gluster volume start {}'.format(volume_name))
 
+
 @task
 def info():
     sudo('gluster volume info')
+
 
 @task
 def status():
