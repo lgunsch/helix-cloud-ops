@@ -50,13 +50,35 @@ fresh set of machines for a new cluster.
 
 **Important**: If the whole cluster is shutdown, you must start up the
 cluster by starting the node with the most advanced node state ID. Individual
-nodes will refuse to start until that node has first been started.
+nodes will refuse to start until that node has first been started. If you
+cannot because it's gone, read the below "Cluster is shutdown" section.
 
-[Restarting the Cluster]()http://galeracluster.com/documentation-webpages/restartingcluster.html)
+[Restarting the Cluster](http://galeracluster.com/documentation-webpages/restartingcluster.html)
 
 For the definition of primary, which is mentioned in the logs a lot, see:
 
 [Primary Component](http://galeracluster.com/documentation-webpages/glossary.html#term-primary-component)
+
+## Cluster is shutdown, and the primary component is permanently failed
+*This is a summary of [Restarting the Cluster]*
+
+For example, if a whole data-center fails (squinting at you Cloud@Cost), and
+it was the primary (which is bad practice). Once you spin up new servers to
+replace the ones lost it will take a few steps to get the cluster going again.
+
+1. Stop all MariaDB instances across the cluster, new ones and old ones.
+   *MariaDB seems to have trouble with `/etc/init.d/mysql stop`, so you
+   may have to also kill processes manually.*
+2. On one node that is **known to have the complete data set** (likely
+   the remaining non-failed server), edit `/var/lib/mysql/grastate.dat`, changing
+   `safe_to_bootstrap` to `1`. `safe_to_bootsrap` is a protection which we
+   may have to disable since there are no remaining usable servers from
+   the primary component.
+3. Start that node with `service mysql bootstrap` to create a new cluster with
+   it's current saved state.
+4. Now start the remaining MariaDB instances to join the new cluster.
+
+**Don't forget to restart HAProxy since it doesn't re-resolve DNS.**
 
 
 ## GlusterFS Cluster
