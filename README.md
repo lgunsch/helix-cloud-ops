@@ -20,7 +20,7 @@ or set of tasks together. No state checking is done.
 
 # Usage:
 
-### `fab <my_task>:<my_args> -H <ip_address> -I`
+### `fab <my_task>:<my_args> -IH <ip_address> `
 Run a task on a host.  We don't maintain a host list because they are all
 expendable, and Cloud at Cost takes forever to spawn servers. **Think
 immutable-architecture**. You should have spawned a brand-spanking new
@@ -30,7 +30,8 @@ machine to replace another, instead of updating it in-place.
 Use this to quickly view a list of all tasks.
 
 ## Galera Cluster
-For recovering stopped nodes read:
+For recovering stopped nodes read both:
+[Resetting the Quorum](http://galeracluster.com/documentation-webpages/quorumreset.html#automatic-bootstrap)
 [Galera Replication - How to recover a PXC Cluster](https://www.percona.com/blog/2014/09/01/galera-replication-how-to-recover-a-pxc-cluster/)
 
 Read docs on [wresp_cluster_address](http://galeracluster.com/documentation-webpages/mysqlwsrepoptions.html#wsrep-cluster-address)
@@ -51,7 +52,8 @@ fresh set of machines for a new cluster.
 **Important**: If the whole cluster is shutdown, you must start up the
 cluster by starting the node with the most advanced node state ID. Individual
 nodes will refuse to start until that node has first been started. If you
-cannot because it's gone, read the below "Cluster is shutdown" section.
+cannot because it's gone, read the below "Cluster is shutdown" section,
+as well as the "manual bootstrap" section of [Resetting the Quorum].
 
 [Restarting the Cluster](http://galeracluster.com/documentation-webpages/restartingcluster.html)
 
@@ -60,7 +62,8 @@ For the definition of primary, which is mentioned in the logs a lot, see:
 [Primary Component](http://galeracluster.com/documentation-webpages/glossary.html#term-primary-component)
 
 ## Cluster is shutdown, and the primary component is permanently failed
-*This is a summary of [Restarting the Cluster]*
+*This is a summary of [Restarting the Cluster] and [Resetting the Quorum]
+"Manual Bootstrap" section.*
 
 For example, if a whole data-center fails (squinting at you Cloud@Cost), and
 it was the primary (which is bad practice). Once you spin up new servers to
@@ -69,13 +72,15 @@ replace the ones lost it will take a few steps to get the cluster going again.
 1. Stop all MariaDB instances across the cluster, new ones and old ones.
    *MariaDB seems to have trouble with `/etc/init.d/mysql stop`, so you
    may have to also kill processes manually.*
+   Note: Ubuntu starts daemons without asking, so *you will have to kill
+   MariaDB right after a fresh install*.
 2. On one node that is **known to have the complete data set** (likely
    the remaining non-failed server), edit `/var/lib/mysql/grastate.dat`, changing
    `safe_to_bootstrap` to `1`. `safe_to_bootsrap` is a protection which we
    may have to disable since there are no remaining usable servers from
    the primary component.
-3. Start that node with `service mysql bootstrap` to create a new cluster with
-   it's current saved state.
+3. Start that node with `service mysql --wsrep-new-cluster` to create a
+   new cluster with it's current saved state.
 4. Now start the remaining MariaDB instances to join the new cluster.
 
 **Don't forget to restart HAProxy since it doesn't re-resolve DNS.**
@@ -98,7 +103,7 @@ If you are replacing a failed node, but reusing a hostname, do this:
 2. Grab the UUID of the failed node from one of the peers.
 3. Update `/var/lib/glusterd/glusterd.info` to have the correct
    UUID, as taken from a peer.
-4. Now follow: [Resolving Peer Rejected](http://gluster.readthedocs.io/en/latest/Administrator%20Guide/Resolving%20Peer%20Rejected/) 
+4. Now follow: [Resolving Peer Rejected](http://gluster.readthedocs.io/en/latest/Administrator%20Guide/Resolving%20Peer%20Rejected/)
 
 
 ## helix-cloud.ca
