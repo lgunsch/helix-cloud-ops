@@ -37,8 +37,13 @@ For recovering stopped nodes read both:
 Read docs on [wresp_cluster_address](http://galeracluster.com/documentation-webpages/mysqlwsrepoptions.html#wsrep-cluster-address)
 to understand how they work before you screw up the cluster.
 
-    fab mariadb.build_cluster:<IP_A>,<IP_B>,<IP_ARB> -I
+    fab mariadb.build_cluster:<HOST_A>,<HOST_B>,<HOST_C> -I
     fab mariadb.add_admin:lgunsch -H <IP_A> -I
+
+or
+
+    fab mariadb.install:'<HOST_A>\,<HOST_B>' -IH <HOST_C>
+    fab mariadb.start -IH <HOST_C>  # restart after install is required, but install does not make assumptions
 
 There must always be an **odd number of nodes**. If there must be an even number
 of nodes, at least have one machine with an arbitrator to make the voting odd.
