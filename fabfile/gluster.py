@@ -4,12 +4,13 @@ from fabric.decorators import task
 from fabric.operations import sudo
 from fabric.tasks import execute
 from fabric.utils import puts, abort
-from fabtools import require
+from fabtools import require, service
 
 __all__ = ['bootstrap_cluster', 'install', 'setup_peering', 'config_volume', 'info', 'status']
 
 default_volume_name = 'gv0'
 storage_path = '/gluster-storage'
+glusterd_info_path = '/var/lib/glusterd/glusterd.info'
 
 
 @task
@@ -31,8 +32,8 @@ def bootstrap_cluster(host_a, host_b, host_c, volume_name=None):
     do_node(host_a)
     do_node(host_b)
     do_node(host_c)
-    execute(setup_peering, [host_b, host_c], host=host_a)
-    execute(config_volume, volume_name, [host_a, host_b, host_c], host=host_a)
+    execute(setup_peering, host_b, host_c, host=host_a)
+    execute(config_volume, volume_name, host_a, host_b, host_c, host=host_a)
 
 
 @task
@@ -47,14 +48,14 @@ def install():
 
 
 @task
-def setup_peering(peer_hosts):
+def setup_peering(*peer_hosts):
     """Make sure you do this only on *ONE* host."""
     for host in peer_hosts:
         sudo('gluster peer probe {}'.format(host))
 
 
 @task
-def config_volume(volume_name, hosts):
+def config_volume(volume_name, *hosts):
     """Make sure you do this only on *ONE* host."""
     replica_num = len(hosts)
     cmd_prefix = 'gluster volume create {} replica {} transport tcp'.format(
@@ -72,9 +73,11 @@ def config_volume(volume_name, hosts):
 
 @task
 def info():
+    """Show volume info."""
     sudo('gluster volume info')
 
 
 @task
 def status():
+    """Show peer status."""
     sudo('gluster peer status')
