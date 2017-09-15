@@ -104,11 +104,19 @@ node` steps.
 ## When you replace a node
 If you are replacing a failed node, but reusing a hostname, do this:
 
-1. Stop GlusterFS
-2. Grab the UUID of the failed node from one of the peers.
-3. Update `/var/lib/glusterd/glusterd.info` to have the correct
-   UUID, as taken from a peer.
-4. Now follow: [Resolving Peer Rejected](http://gluster.readthedocs.io/en/latest/Administrator%20Guide/Resolving%20Peer%20Rejected/)
+1. Stop GlusterFS: `service glusterfs-server stop`.
+2. Grab the UUID of the failed node from one of the good peers:
+   `gluster peer status`.
+3. Remove everything, except for `glusterd.info` in
+   `/var/lib/glusterd/glusterd.info`:
+   `rm -Rf bitd/ geo-replication/ glustershd/ groups/ hooks/ nfs/ options `
+   ` peers/ quotad/ scrub/ snaps/ ss_brick/ vols/`.
+4. Update `/var/lib/glusterd/glusterd.info` to have the correct UUID,
+   as taken from a peer earlier.
+5. Start GlusterFS: `service glusterfs-service start`
+6. Probe a good gluster peer: `gluster peer probe node-1.helix-cloud.ca`
+
+[Resolving Peer Rejected](http://gluster.readthedocs.io/en/latest/Administrator%20Guide/Resolving%20Peer%20Rejected/)
 
 
 ## helix-cloud.ca
