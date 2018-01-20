@@ -115,6 +115,9 @@ If you are replacing a failed node, but reusing a hostname, do this:
    as taken from a peer earlier.
 5. Start GlusterFS: `service glusterfs-service start`
 6. Probe a good gluster peer: `gluster peer probe node-1.helix-cloud.ca`
+7. Possibly re-start the `glusterfs-service` until it becomes "Peer in Cluster"
+8. Make sure all peers have a "proper looking" `gluster pool list`.
+9. From the good node: `gluster volume sync HOSTNAME`.
 
 [Resolving Peer Rejected](http://gluster.readthedocs.io/en/latest/Administrator%20Guide/Resolving%20Peer%20Rejected/)
 
