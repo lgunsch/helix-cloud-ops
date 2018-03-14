@@ -3,8 +3,8 @@ from unipath import Path
 __all__ = []
 
 
-galera_provider = Path('./files/galera-3_25.3.22+1trusty_amd64.deb')
-galera_arbitrator = Path('./files/galera-arbitrator-3_25.3.22+1trusty_amd64.deb')
+galera_provider = Path('./files/galera-3_25.3.23+1trusty_amd64.deb')
+galera_arbitrator = Path('./files/galera-arbitrator-3_25.3.23+1trusty_amd64.deb')
 haproxy_cfg = Path('./files/haproxy.cfg')
 
 
