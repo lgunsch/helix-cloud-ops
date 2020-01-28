@@ -1,5 +1,5 @@
 -e git+https://github.com/fabric/fabric/@be11cf9990bff976c3f542133954ef4e93c8cc14#egg=Fabric
-paramiko==1.17.2
+paramiko==2.0.9
 fabtools==0.20.0
 unipath==1.1.0
 jinja2==2.9.5
